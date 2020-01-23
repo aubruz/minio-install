@@ -7,12 +7,23 @@ do
      [yY][eE][sS]|[yY])
  read -p 'Minio port used [default 9000]: ' minio_port
  if [ $minio_port -eq 9000 ]; then
-   firewall-cmd --remove-service=minio --permanent --zone=public
+   if [ -x "$(command -v ufw)" ]; then
+     ufw deny 9000
+   elif [ -x "$(command -v firewall-cmd)" ]; then
+    firewall-cmd --remove-service=minio --permanent --zone=public
+    echo "Reloading firewalld: "
+    firewall-cmd --reload
+   fi
  else
-   firewall-cmd --remove-port=$minio_port/tcp --permanent --zone=public
+   if [ -x "$(command -v ufw)" ]; then
+     ufw deny $minio_port
+   elif [ -x "$(command -v firewall-cmd)" ]; then
+    firewall-cmd --remove-port=$minio_port/tcp --permanent --zone=public
+    echo "Reloading firewalld: "
+    firewall-cmd --reload
+   fi
  fi
- echo "Reloading firewalld: "
- firewall-cmd --reload
+
 
  break
  ;;
@@ -41,8 +52,7 @@ fi
 if [ -f "/usr/local/bin/mc" ]; then
   rm -f /usr/local/bin/mc
 fi
-if [ -f "/etc/default/minio" ]; then
-  rm -f /etc/default/minio
+if [ -f "/etc/defautl/minio" ]; then
+  rm -f /etc/defautl/minio
 fi
-
 userdel minio-user
