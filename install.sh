@@ -115,9 +115,17 @@ EOF
 if [ "$open_fw_port" = true ];then
   echo -e "Opening port $minio_port in firewalld: "
   if [ $minio_port -eq 9000 ]; then
-    firewall-cmd --add-service=minio --permanent --zone=public
+    if [ -x "$(command -v ufw)" ]; then
+      ufw allow 9000
+    elif [ -x "$(command -v firewall-cmd)" ]
+      firewall-cmd --add-service=minio --permanent --zone=public
+    fi
   else
-    firewall-cmd --add-port=$minio_port/tcp --permanent --zone=public
+    if [ -x "$(command -v ufw)" ]; then
+      ufw allow $minio_port
+    elif [ -x "$(command -v firewall-cmd)" ]
+      firewall-cmd --add-port=$minio_port/tcp --permanent --zone=public
+    fi
   fi
   echo "Reloading firewalld: "
   firewall-cmd --reload
