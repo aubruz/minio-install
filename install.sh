@@ -68,6 +68,7 @@ EOF
 fi
 
 systemctl_reload=false
+# If a minio.service was already there we need to reload systemctl's daemon
 if [ -f "/etc/systemd/system/minio.service" ]; then
   systemctl_reload=true
 fi
@@ -117,13 +118,13 @@ if [ "$open_fw_port" = true ];then
   if [ $minio_port -eq 9000 ]; then
     if [ -x "$(command -v ufw)" ]; then
       ufw allow 9000
-    elif [ -x "$(command -v firewall-cmd)" ]
+    elif [ -x "$(command -v firewall-cmd)" ]; then
       firewall-cmd --add-service=minio --permanent --zone=public
     fi
   else
     if [ -x "$(command -v ufw)" ]; then
       ufw allow $minio_port
-    elif [ -x "$(command -v firewall-cmd)" ]
+    elif [ -x "$(command -v firewall-cmd)" ]; then
       firewall-cmd --add-port=$minio_port/tcp --permanent --zone=public
     fi
   fi
